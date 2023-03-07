@@ -5,6 +5,7 @@ env.config();
 module.exports.protectRoute=function protectRoute(req,res,next){
     //authenticating the user
     if(req.cookies.login){
+        console.log(req.cookies.login);
         let isVerified=jwt.verify(req.cookies.login,process.env.JWT_SECRET_KEY);
         if(isVerified){
             next();

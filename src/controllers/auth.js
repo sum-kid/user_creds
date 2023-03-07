@@ -1,3 +1,4 @@
+const express=require('express');
 const userModel=require('../models/userModel');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
@@ -41,7 +42,8 @@ module.exports.signin=async function signin(req,res){
                 res.cookie('login',token,{httpOnly:true});
                 return res.json({
                     message:"User signed-in",
-                    data:user
+                    data:user,
+                    cookie:req.cookies.login
                 });
             }
             else{
@@ -55,6 +57,21 @@ module.exports.signin=async function signin(req,res){
                 message:"Please enter valid email"
             });
         }
+    }
+    catch(err){
+        return res.status(500).json({
+            message:err.message
+        });
+    }
+}
+
+module.exports.signout=function signout(req,res){
+    try{
+       // console.log(req.cookies.loger);
+        res.cookie('login','',{maxAge:1});
+        res.json({
+            message:"User signed-out successfully"
+        })
     }
     catch(err){
         return res.status(500).json({
