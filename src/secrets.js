@@ -1,1 +1,0 @@
-module.exports={JWT_KEY:"erefd65e65ZD65sazxwsfkj34oirefdncoief"};
