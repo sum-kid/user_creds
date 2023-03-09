@@ -1,6 +1,7 @@
 const mongoose=require('mongoose');
 const emailValidator=require('email-validator');
 const bcrypt=require('bcryptjs');
+const crypto=require('crypto');
 const env=require('dotenv');
 env.config();
 
@@ -53,6 +54,7 @@ const userSchema=new mongoose.Schema({
         type: String,
         default: 'img/users/default.jpeg'
     },
+    resetToken: String
 });
 
 userSchema.pre('save',async function(next){
@@ -64,6 +66,19 @@ userSchema.pre('save',async function(next){
     }
     next();
 });
+
+userSchema.methods.createResetToken=function(){
+    const resetToken=crypto.randomBytes(32).toString('hex');
+    this.resetToken=resetToken;
+    return resetToken; 
+}
+
+userSchema.methods.resetPasswordHandler=function(password,confirmPassword){
+    this.password=password;
+    this.confirmPassword=confirmPassword;
+   // console.token(this.resetToken);
+    this.resetToken=undefined;
+}
 
 const userModel=mongoose.model('userModel',userSchema);
 

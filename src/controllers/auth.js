@@ -10,6 +10,8 @@ module.exports.signup=async function signup(req,res){
         let dataObj=req.body;
         //encrypt the password here
         let user=await userModel.create(dataObj);
+       // user.createResetToken();
+        //console.log(user.resetToken);
         if(user){
             return res.json({
                 message:"User signed up successfully",
@@ -34,6 +36,7 @@ module.exports.signin=async function signin(req,res){
     try{
         let data=req.body;
         let user=await userModel.findOne({email:data.email});
+      //  console.log(user.resetToken);
         if(user){
             const isMatch=await bcrypt.compare(data.password,user.password);
             if(isMatch){
@@ -72,6 +75,40 @@ module.exports.signout=function signout(req,res){
         res.json({
             message:"User signed-out successfully"
         })
+    }
+    catch(err){
+        return res.status(500).json({
+            message:err.message
+        });
+    }
+}
+
+module.exports.resetPassword=async function resetPassword(req,res){
+    try{
+        const id=req.params.id;
+        let {oldPassword,newPassword,confirmnewPassword}=req.body;
+        const user=await userModel.findById(id);
+        //console.log(user);
+        if(user){
+            const isMatch=await bcrypt.compare(oldPassword,user.password);
+            if(isMatch){
+                user.resetPasswordHandler(newPassword,confirmnewPassword);
+                await user.save();
+                return res.json({
+                    message:"Password changed successfully"
+                });
+            }
+            else{
+                return res.json({
+                    message:"Please enter correct password to change your password"
+                });
+            }
+        }
+        else{
+            return res.json({
+                message:"Please login again"
+            });
+        }
     }
     catch(err){
         return res.status(500).json({
