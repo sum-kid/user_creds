@@ -54,7 +54,10 @@ const userSchema=new mongoose.Schema({
         type: String,
         default: 'img/users/default.jpeg'
     },
-    resetToken: String
+    resetToken: {
+        type:String,
+        default:''
+    }
 });
 
 userSchema.pre('save',async function(next){
@@ -69,14 +72,12 @@ userSchema.pre('save',async function(next){
 
 userSchema.methods.createResetToken=function(){
     const resetToken=crypto.randomBytes(32).toString('hex');
-    this.resetToken=resetToken;
-    return resetToken; 
+    this.resetToken=resetToken; 
 }
 
 userSchema.methods.resetPasswordHandler=function(password,confirmPassword){
     this.password=password;
     this.confirmPassword=confirmPassword;
-   // console.token(this.resetToken);
     this.resetToken=undefined;
 }
 

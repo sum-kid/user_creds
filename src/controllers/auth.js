@@ -9,9 +9,16 @@ module.exports.signup=async function signup(req,res){
     try{
         let dataObj=req.body;
         //encrypt the password here
-        let user=await userModel.create(dataObj);
-       // user.createResetToken();
-        //console.log(user.resetToken);
+        let attributes=[];
+        for(let data in dataObj){
+            attributes.push(data);
+        }
+        let user=new userModel();
+        for(let i=0;i<attributes.length;i++){
+            user[attributes[i]]=dataObj[attributes[i]];
+        }
+        user.createResetToken();
+        await user.save();
         if(user){
             return res.json({
                 message:"User signed up successfully",
@@ -107,6 +114,33 @@ module.exports.resetPassword=async function resetPassword(req,res){
         else{
             return res.json({
                 message:"Please login again"
+            });
+        }
+    }
+    catch(err){
+        return res.status(500).json({
+            message:err.message
+        });
+    }
+}
+
+module.exports.forgotPassword=async function forgotPassword(req,res){
+    try{
+        //the token which is sent over the mail and this token is reset after every mail
+        const token=req.params.token;
+        let {password,confirmPassword}=req.body;
+        const user=await userModel.findOne({resetToken:token});
+        if(user){
+            user.resetPasswordHandler(password,confirmPassword);
+            user.createResetToken();
+            await user.save();
+            return res.json({
+                message:"Password changed successfully"
+            });
+        }
+        else{
+            return res.json({
+                message:"User not found!!Please sign-up"
             });
         }
     }
